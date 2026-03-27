@@ -129,14 +129,10 @@ With the cursor on `0xff00ffffff9e0140`, pressing `<leader>om` shows:
 ```
 MAP_TYPE:0xff00ffffff9e0140
 0xff00000000000000 = MEMBER_OF(65280 = 0xff00)
-               0x1 = TO
               0x40 = RETURN_PARAM
              0x100 = LITERAL
-             0x200 = IMPLICIT
-            0x4000 = ATTACH
-            0x8000 = FB_NULLIFY
     0x100000000000 = NON_CONTIG
-      0xfffe9e0000 = UNKNOWN
+    0xefffff9e0000 = UNKNOWN
 ```
 
 ## How it works
