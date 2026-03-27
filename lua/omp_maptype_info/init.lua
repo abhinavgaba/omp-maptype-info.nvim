@@ -144,14 +144,20 @@ function M.show_maptype()
   end
 
   local types = get_map_types()
+  local sorted = {}
   for name, val in pairs(types) do
+    table.insert(sorted, { name = name, val = val })
+  end
+  table.sort(sorted, function(a, b) return a.val < b.val end)
+
+  for _, entry in ipairs(sorted) do
     if flags_int == 0 then
       break
     end
-    local band = vim.fn["and"](flags_int, val)
+    local band = vim.fn["and"](flags_int, entry.val)
     if band ~= 0 then
-      table.insert(lines, string.format("%18s = %s", string.format("0x%x", val), display_name(name)))
-      flags_int = vim.fn["and"](flags_int, vim.fn.invert(val))
+      table.insert(lines, string.format("%18s = %s", string.format("0x%x", entry.val), display_name(entry.name)))
+      flags_int = vim.fn["and"](flags_int, vim.fn.invert(entry.val))
     end
   end
 
