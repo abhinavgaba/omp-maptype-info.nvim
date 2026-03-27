@@ -127,13 +127,13 @@ A popup appears at the cursor showing the result. Move the cursor to dismiss it.
 With the cursor on `0xff00ffffff9e0140`, pressing `<leader>om` shows:
 
 ```
-╭──MAP_TYPE:0xff00ffffff9e0140──╮
+╭─────────MAP_TYPE:0xff00ffffff9e0140──────────╮
 │0xff00000000000000 = MEMBER_OF(65280 = 0xff00)│
-│              0x40 = RETURN_PARAM              │
-│             0x100 = LITERAL                   │
-│    0x100000000000 = NON_CONTIG                │
-│    0xefffff9e0000 = UNKNOWN                   │
-╰───────────────────────────────────────────────╯
+│              0x40 = RETURN_PARAM             │
+│             0x100 = LITERAL                  │
+│    0x100000000000 = NON_CONTIG               │
+│    0xefffff9e0000 = UNKNOWN                  │
+╰──────────────────────────────────────────────╯
 ```
 
 ## How it works
