@@ -127,7 +127,9 @@ function M.show_maptype()
   local flag_bits = "0x" .. string.sub(hex, 7)
   local flags_int = tonumber(flag_bits, 10)
 
-  local lines = {}
+  -- Collect decoded entries first, then format with dynamic padding
+  local entries = {}
+
   if member_of_bits ~= "0x0000" then
     local member_dec = tonumber(member_of_bits)
     local fmt = M.config.member_of_format
@@ -140,7 +142,7 @@ function M.show_maptype()
       member_str = string.format("%d = %s", member_dec, member_of_bits)
     end
     local member_hex = string.format("%s000000000000", member_of_bits)
-    table.insert(lines, string.format("%18s = MEMBER_OF(%s)", member_hex, member_str))
+    table.insert(entries, { hex = member_hex, label = "MEMBER_OF(" .. member_str .. ")" })
   end
 
   local types = get_map_types()
@@ -156,16 +158,41 @@ function M.show_maptype()
     end
     local band = vim.fn["and"](flags_int, entry.val)
     if band ~= 0 then
-      table.insert(lines, string.format("%18s = %s", string.format("0x%x", entry.val), display_name(entry.name)))
+      table.insert(entries, { hex = string.format("0x%x", entry.val), label = display_name(entry.name) })
       flags_int = vim.fn["and"](flags_int, vim.fn.invert(entry.val))
     end
   end
 
   if flags_int ~= 0 then
-    table.insert(lines, string.format("%18s = UNKNOWN", string.format("0x%x", flags_int)))
+    table.insert(entries, { hex = string.format("0x%x", flags_int), label = "UNKNOWN" })
   end
 
-  show_popup("MAP_TYPE:" .. hex, lines)
+  -- Find the widest hex and label for alignment
+  local max_hex_len = 0
+  local max_label_len = 0
+  for _, e in ipairs(entries) do
+    max_hex_len = math.max(max_hex_len, #e.hex)
+    max_label_len = math.max(max_label_len, #e.label)
+  end
+
+  -- The widest unpadded line is: max_hex + " = " + max_label
+  -- Center it in the popup with padding on each side
+  local padding = 2
+  local core_width = max_hex_len + 3 + max_label_len -- "hex = label"
+  local title = "MAP_TYPE:" .. hex
+  local popup_inner = math.max(#title + 2, core_width + padding * 2)
+  -- Left margin so the widest line is centered
+  local left_margin = math.floor((popup_inner - core_width) / 2)
+  local hex_col_width = left_margin + max_hex_len
+
+  local lines = {}
+  local right_margin = popup_inner - hex_col_width - 3 -- 3 for ' = '
+  local pad_fmt = "%" .. hex_col_width .. "s = %-" .. right_margin .. "s"
+  for _, e in ipairs(entries) do
+    table.insert(lines, string.format(pad_fmt, e.hex, e.label))
+  end
+
+  show_popup(title, lines)
 end
 
 --- Show a cheat-sheet of all known map-type flags with hex and decimal values.
