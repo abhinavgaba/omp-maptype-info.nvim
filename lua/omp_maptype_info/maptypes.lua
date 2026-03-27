@@ -33,7 +33,7 @@ end
 function M.parse(content)
   local types = {}
   -- Match lines like:  OMP_MAP_TO = 0x01,
-  for name, hex in content:gmatch("(OMP_MAP_%w+)%s*=%s*(0x%x+)") do
+  for name, hex in content:gmatch("(OMP_MAP_[%w_]+)%s*=%s*(0x%x+)") do
     -- Skip the MEMBER_OF mask and NONE
     if name ~= "OMP_MAP_MEMBER_OF" and name ~= "OMP_MAP_NONE" then
       local val = tonumber(hex)
