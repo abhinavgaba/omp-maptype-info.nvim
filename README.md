@@ -29,7 +29,7 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
   "abhinavgaba/omp-maptype-info.nvim",
 
   dependencies = { "MunifTanjim/nui.nvim" },
-  keys = { "<leader>oh", "<leader>od", "<leader>om" },
+  keys = { "<leader>oh", "<leader>od", "<leader>om", "<leader>oc" },
   cmd = { "OmpMapTypeSync" },
   opts = {},
 }
@@ -44,9 +44,10 @@ Default configuration:
 ```lua
 require("omp_maptype_info").setup({
   keymaps = {
-    hex = "<leader>oh",      -- show word under cursor in hex
-    dec = "<leader>od",      -- show word under cursor in decimal
-    maptype = "<leader>om",  -- decode word as OpenMP map-type bitmask
+    hex = "<leader>oh",        -- show word under cursor in hex
+    dec = "<leader>od",        -- show word under cursor in decimal
+    maptype = "<leader>om",    -- decode word as OpenMP map-type bitmask
+    cheatsheet = "<leader>oc", -- show all known map-type flags
   },
   source = {
     repo = "llvm/llvm-project",
@@ -67,13 +68,14 @@ To use different keymaps, pass them via `opts`. When using lazy.nvim, make sure 
   "abhinavgaba/omp-maptype-info.nvim",
 
   dependencies = { "MunifTanjim/nui.nvim" },
-  keys = { "<leader>xh", "<leader>xd", "<leader>xm" },
+  keys = { "<leader>xh", "<leader>xd", "<leader>xm", "<leader>xc" },
   cmd = { "OmpMapTypeSync" },
   opts = {
     keymaps = {
       hex = "<leader>xh",
       dec = "<leader>xd",
       maptype = "<leader>xm",
+      cheatsheet = "<leader>xc",
     },
   },
 }
@@ -98,7 +100,14 @@ Then run `:OmpMapTypeSync` to fetch and cache the flags from that repo.
 
 | Command | Description |
 |---|---|
-| `:OmpMapTypeSync` | Fetch the latest map-type flags from the configured LLVM source repo and cache them locally |
+| `:OmpMapTypeSync` | Fetch the latest map-type flags from the configured source and cache them locally |
+| `:OmpMapTypeSync {url}` | Fetch from a specific GitHub URL instead of the configured source |
+
+The URL should be a GitHub blob URL pointing to a file that contains lines matching the pattern `OMP_MAP_<NAME> = 0x<hex>` (such as LLVM's `OMPConstants.h`):
+
+```
+:OmpMapTypeSync https://github.com/llvm/llvm-project/blob/main/llvm/include/llvm/Frontend/OpenMP/OMPConstants.h
+```
 
 ## Usage
 
@@ -109,6 +118,7 @@ Place your cursor on a number in a buffer (decimal or hex) and press:
 | `<leader>oh` | Show the number in hexadecimal |
 | `<leader>od` | Show the number in decimal |
 | `<leader>om` | Decode as an OpenMP map-type bitmask |
+| `<leader>oc` | Show cheat-sheet of all known map-type flags |
 
 A popup appears at the cursor showing the result. Move the cursor to dismiss it.
 
@@ -118,13 +128,15 @@ With the cursor on `0xff00ffffff9e0140`, pressing `<leader>om` shows:
 
 ```
 MAP_TYPE:0xff00ffffff9e0140
-0xff00000000000000 = MEMBER_OF(0xff00)
-0x100              = LITERAL
-0x40               = RETURN_PARAM
-0x200              = IMPLICIT
-0x4000             = ATTACH
-0x8000             = FB_NULLIFY
-...
+0xff00000000000000 = MEMBER_OF(65280 = 0xff00)
+               0x1 = TO
+              0x40 = RETURN_PARAM
+             0x100 = LITERAL
+             0x200 = IMPLICIT
+            0x4000 = ATTACH
+            0x8000 = FB_NULLIFY
+    0x100000000000 = NON_CONTIG
+      0xfffe9e0000 = UNKNOWN
 ```
 
 ## How it works
