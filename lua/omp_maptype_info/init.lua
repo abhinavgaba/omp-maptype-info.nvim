@@ -9,6 +9,8 @@ M.config = {
     dec = "<leader>od",
     maptype = "<leader>om",
   },
+  -- "hex", "dec", or "both"
+  member_of_format = "both",
   source = {
     repo = "llvm/llvm-project",
     branch = "main",
@@ -126,7 +128,17 @@ function M.show_maptype()
 
   local lines = {}
   if member_of_bits ~= "0x0000" then
-    table.insert(lines, string.format("%s000000000000 = MEMBER_OF(%s)", member_of_bits, member_of_bits))
+    local member_dec = tonumber(member_of_bits)
+    local fmt = M.config.member_of_format
+    local member_str
+    if fmt == "dec" then
+      member_str = string.format("%d", member_dec)
+    elseif fmt == "hex" then
+      member_str = member_of_bits
+    else -- "both"
+      member_str = string.format("%d = %s", member_dec, member_of_bits)
+    end
+    table.insert(lines, string.format("%s000000000000 = MEMBER_OF(%s)", member_of_bits, member_str))
   end
 
   local types = get_map_types()
