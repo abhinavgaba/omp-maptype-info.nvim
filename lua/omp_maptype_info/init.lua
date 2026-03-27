@@ -8,6 +8,7 @@ M.config = {
     hex = "<leader>oh",
     dec = "<leader>od",
     maptype = "<leader>om",
+    cheatsheet = "<leader>oc",
   },
   -- "hex", "dec", or "both"
   member_of_format = "both",
@@ -161,6 +162,42 @@ function M.show_maptype()
   show_popup("MAP_TYPE:" .. hex, lines)
 end
 
+--- Show a cheat-sheet of all known map-type flags with hex and decimal values.
+function M.show_cheatsheet()
+  local types = get_map_types()
+
+  -- Sort by value for consistent display
+  local sorted = {}
+  for name, val in pairs(types) do
+    table.insert(sorted, { name = name, val = val })
+  end
+  table.sort(sorted, function(a, b) return a.val < b.val end)
+
+  -- Find the longest display name for alignment
+  local max_name_len = #"MEMBER_OF"
+  for _, entry in ipairs(sorted) do
+    max_name_len = math.max(max_name_len, #display_name(entry.name))
+  end
+
+  local lines = {}
+  local fmt = "%18s = %-" .. max_name_len .. "s (%d)"
+  for _, entry in ipairs(sorted) do
+    table.insert(lines, string.format(
+      fmt,
+      string.format("0x%x", entry.val),
+      display_name(entry.name),
+      entry.val
+    ))
+  end
+  table.insert(lines, string.format(
+    "%18s = %-" .. max_name_len .. "s (bits 48-63)",
+    "0xffff000000000000",
+    "MEMBER_OF"
+  ))
+
+  show_popup("OpenMP Map-Type Cheat-Sheet", lines)
+end
+
 --- Fetch the latest map types from the configured source repo.
 function M.sync()
   vim.notify("Syncing OpenMP map types from " .. M.config.source.repo .. "...", vim.log.levels.INFO)
@@ -190,6 +227,9 @@ function M.setup(opts)
   end
   if km.maptype then
     vim.keymap.set("n", km.maptype, M.show_maptype, { desc = "Display OpenMP map-types for current word" })
+  end
+  if km.cheatsheet then
+    vim.keymap.set("n", km.cheatsheet, M.show_cheatsheet, { desc = "Show OpenMP map-type cheat-sheet" })
   end
 
   vim.api.nvim_create_user_command("OmpMapTypeSync", function()
