@@ -17,7 +17,6 @@ It also provides general-purpose hex/decimal conversion for any number under the
 ## Requirements
 
 - Neovim >= 0.10
-- A C compiler (`cc`) available in `PATH` (used once at install time to build a small shared library)
 - [nui.nvim](https://github.com/MunifTanjim/nui.nvim) (for popup display)
 - [gh](https://cli.github.com/) (optional, for fetching from private repos)
 
@@ -28,7 +27,7 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 ```lua
 {
   "abhinavgaba/omp-maptype-info.nvim",
-  build = "cc -shared -fPIC -o c_utils.so c_utils.c",
+
   dependencies = { "MunifTanjim/nui.nvim" },
   keys = { "<leader>oh", "<leader>od", "<leader>om" },
   cmd = { "OmpMapTypeSync" },
@@ -66,7 +65,7 @@ To use different keymaps, pass them via `opts`. When using lazy.nvim, make sure 
 ```lua
 {
   "abhinavgaba/omp-maptype-info.nvim",
-  build = "cc -shared -fPIC -o c_utils.so c_utils.c",
+
   dependencies = { "MunifTanjim/nui.nvim" },
   keys = { "<leader>xh", "<leader>xd", "<leader>xm" },
   cmd = { "OmpMapTypeSync" },
@@ -130,7 +129,7 @@ MAP_TYPE:0xff00ffffff9e0140
 
 ## How it works
 
-The plugin ships a small C file (`c_utils.c`) that handles unsigned 64-bit string-to-hex/decimal conversion via `strtoull`/`sprintf`. This is built into a shared library at install time and loaded via LuaJIT FFI. This avoids Lua/Vimscript's signed 64-bit integer limitations.
+The plugin uses LuaJIT FFI to call the system C library's `strtoull`/`sprintf` directly for unsigned 64-bit string-to-hex/decimal conversion. This avoids Lua/Vimscript's signed 64-bit integer limitations without requiring any compiled C code.
 
 Map-type flag definitions are loaded from a local cache (populated by `:OmpMapTypeSync`) or from a built-in default set matching upstream LLVM. The decoder splits off the top 16 bits for `MEMBER_OF` extraction, then tests remaining bits against each known flag.
 
