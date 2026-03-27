@@ -136,6 +136,30 @@ With the cursor on `0xff00ffffff9e0140`, pressing `<leader>om` shows:
 ╰──────────────────────────────────────────────╯
 ```
 
+Pressing `<leader>oc` shows the cheat-sheet of all known flags:
+
+```
+╭───────────OpenMP Map-Type Cheat-Sheet────────────╮
+│               0x1 = TO           (1)             │
+│               0x2 = FROM         (2)             │
+│               0x4 = ALWAYS       (4)             │
+│               0x8 = DELETE       (8)             │
+│              0x10 = PTR_AND_OBJ  (16)            │
+│              0x20 = TARGET_PARAM (32)            │
+│              0x40 = RETURN_PARAM (64)            │
+│              0x80 = PRIVATE      (128)           │
+│             0x100 = LITERAL      (256)           │
+│             0x200 = IMPLICIT     (512)           │
+│             0x400 = CLOSE        (1024)          │
+│            0x1000 = PRESENT      (4096)          │
+│            0x2000 = OMPX_HOLD    (8192)          │
+│            0x4000 = ATTACH       (16384)         │
+│            0x8000 = FB_NULLIFY   (32768)         │
+│    0x100000000000 = NON_CONTIG   (17592186044416)│
+│0xffff000000000000 = MEMBER_OF    (bits 48-63)    │
+╰──────────────────────────────────────────────────╯
+```
+
 ## How it works
 
 The plugin uses LuaJIT FFI to call the system C library's `strtoull`/`sprintf` directly for unsigned 64-bit string-to-hex/decimal conversion. This avoids Lua/Vimscript's signed 64-bit integer limitations without requiring any compiled C code.
