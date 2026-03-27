@@ -204,10 +204,39 @@ function M.show_cheatsheet()
   show_popup("OpenMP Map-Type Cheat-Sheet", lines)
 end
 
---- Fetch the latest map types from the configured source repo.
-function M.sync()
-  vim.notify("Syncing OpenMP map types from " .. M.config.source.repo .. "...", vim.log.levels.INFO)
-  maptypes.sync(M.config.source, function(err, types)
+--- Parse a GitHub URL into a source table.
+--- Supports formats like:
+---   https://github.com/owner/repo/blob/branch/path/to/file
+--- @param url string
+--- @return table|nil source table with repo, branch, path fields, or nil on failure
+local function parse_github_url(url)
+  local owner, repo, branch, path = url:match(
+    "https?://github%.com/([^/]+)/([^/]+)/blob/([^/]+)/(.*)"
+  )
+  if owner and repo and branch and path then
+    return {
+      repo = owner .. "/" .. repo,
+      branch = branch,
+      path = path,
+    }
+  end
+  return nil
+end
+
+--- Fetch the latest map types from the configured source repo or a URL.
+--- @param url? string optional GitHub URL to fetch from
+function M.sync(url)
+  local source = M.config.source
+  if url then
+    source = parse_github_url(url)
+    if not source then
+      vim.notify("Could not parse GitHub URL: " .. url, vim.log.levels.ERROR)
+      return
+    end
+  end
+
+  vim.notify("Syncing OpenMP map types from " .. source.repo .. "...", vim.log.levels.INFO)
+  maptypes.sync(source, function(err, types)
     if err then
       vim.notify(err, vim.log.levels.ERROR)
       return
@@ -238,9 +267,10 @@ function M.setup(opts)
     vim.keymap.set("n", km.cheatsheet, M.show_cheatsheet, { desc = "Show OpenMP map-type cheat-sheet" })
   end
 
-  vim.api.nvim_create_user_command("OmpMapTypeSync", function()
-    M.sync()
-  end, { desc = "Fetch latest OpenMP map type flags from LLVM" })
+  vim.api.nvim_create_user_command("OmpMapTypeSync", function(cmd)
+    local url = cmd.args ~= "" and cmd.args or nil
+    M.sync(url)
+  end, { nargs = "?", desc = "Fetch latest OpenMP map type flags from LLVM" })
 end
 
 return M
