@@ -138,7 +138,8 @@ function M.show_maptype()
     else -- "both"
       member_str = string.format("%d = %s", member_dec, member_of_bits)
     end
-    table.insert(lines, string.format("%s000000000000 = MEMBER_OF(%s)", member_of_bits, member_str))
+    local member_hex = string.format("%s000000000000", member_of_bits)
+    table.insert(lines, string.format("%18s = MEMBER_OF(%s)", member_hex, member_str))
   end
 
   local types = get_map_types()
@@ -148,13 +149,13 @@ function M.show_maptype()
     end
     local band = vim.fn["and"](flags_int, val)
     if band ~= 0 then
-      table.insert(lines, string.format("0x%-16x = %s", val, display_name(name)))
+      table.insert(lines, string.format("%18s = %s", string.format("0x%x", val), display_name(name)))
       flags_int = vim.fn["and"](flags_int, vim.fn.invert(val))
     end
   end
 
   if flags_int ~= 0 then
-    table.insert(lines, string.format("0x%-16x = UNKNOWN", flags_int))
+    table.insert(lines, string.format("%18s = UNKNOWN", string.format("0x%x", flags_int)))
   end
 
   show_popup("MAP_TYPE:" .. hex, lines)
